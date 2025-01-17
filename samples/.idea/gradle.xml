@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/jobs/intermitent-failure" />
+            <option value="$PROJECT_DIR$/jobs/kafka-source-redis-sink" />
+            <option value="$PROJECT_DIR$/jobs/partitioned-stream" />
+            <option value="$PROJECT_DIR$/jobs/random-kafka-sink" />
+            <option value="$PROJECT_DIR$/jobs/stream-source-stream-sink" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

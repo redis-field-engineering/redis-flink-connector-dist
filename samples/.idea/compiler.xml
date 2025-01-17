@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel target="19">
+      <module name="bluesky-sentiment-analysis.intermitent-failure.main" target="11" />
+      <module name="bluesky-sentiment-analysis.intermitent-failure.test" target="11" />
+      <module name="bluesky-sentiment-analysis.kafka-source-redis-sink.main" target="11" />
+      <module name="bluesky-sentiment-analysis.kafka-source-redis-sink.test" target="11" />
+      <module name="bluesky-sentiment-analysis.partitioned-stream.main" target="11" />
+      <module name="bluesky-sentiment-analysis.partitioned-stream.test" target="11" />
+      <module name="bluesky-sentiment-analysis.random-kafka-sink.main" target="11" />
+      <module name="bluesky-sentiment-analysis.random-kafka-sink.test" target="11" />
+      <module name="bluesky-sentiment-analysis.stream-source-stream-sink.main" target="11" />
+      <module name="bluesky-sentiment-analysis.stream-source-stream-sink.test" target="11" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

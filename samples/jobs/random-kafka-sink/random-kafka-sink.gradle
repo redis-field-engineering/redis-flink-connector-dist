@@ -1,0 +1,50 @@
+plugins{
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+dependencies {
+    implementation 'com.redis:redis-flink-connector:0.0.1'
+    implementation 'redis.clients:jedis:5.2.0'
+    implementation 'org.apache.flink:flink-java:1.20.0'
+    implementation 'org.apache.flink:flink-streaming-java:1.20.0'
+    implementation 'com.esotericsoftware.kryo:kryo:2.24.0'
+    implementation 'org.objenesis:objenesis:2.1'
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'org.xerial.snappy:snappy-java:1.1.10.4'
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    // Apache Flink dependencies
+    implementation 'org.apache.flink:flink-streaming-java:1.20.0' // Replace with your desired Flink version
+
+    // Flink Kafka connector
+    implementation 'org.apache.flink:flink-connector-kafka:3.4.0-1.20' // Match the version to Flink's version
+
+
+}
+
+version = '1.0-SNAPSHOT'
+
+
+shadowJar {
+    archiveBaseName.set("${project.name}-all")
+    archiveClassifier.set("")
+    archiveVersion.set("${version}")
+
+    manifest {
+        attributes 'Main-Class': 'com.redis.Main'
+    }
+}
+
+tasks.named('runShadow') {
+    mainClass.set('com.redis.Main')
+}
+
+project.setProperty("mainClassName", "com.redis.Main")
+
+
+config {
+    publishing {
+        enabled = false
+    }
+}

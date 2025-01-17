@@ -1,0 +1,136 @@
+= Redis Flink Connector
+:linkattrs:
+:name:               Redis Flink Connector
+:project-owner:      redis-field-engineering
+:project-name:       redis-flink-connector
+:project-group:      com.redis
+:project-version: 0.0.1
+:dist-repo-name:     redis-flink-connector-dist
+
+The Redis Flink Connector is a highly performant, scalable Flink Source and Sink
+connector for Redis. It is designed and built to provide a simple, scalable means of
+using Redis as a source and Sink for your stream-processing use cases in Flink.
+
+== Partitioned Streams
+
+The Redis Flink Connector supports partitioned streams, allowing you to configure how many
+separate partitions you want for your stream of data. This allows you to scale your stream
+across a Redis Cluster, allowing Flink to manage the work of coordinating which consumer
+owns which stream.
+
+== Exactly-Once Semantics
+
+The Redis Flink Connector supports exactly-once semantics. This is tied into
+the checkpointing mechanism in Flink. Please note that "exactly once" refers to
+is at the checkpoint level, so in the case of a failure in your pipeline
+you may see messages within a checkpoint being delivered more than once
+
+=== Gradle
+
+Add the following to your `build.gradle` file
+
+[source,groovy]
+[subs="attributes"]
+.build.gradle
+----
+dependencies {
+    implementation '{project-group}:{project-name}-spring:{project-version}'
+}
+----
+
+
+== Using the Stream Source
+
+To use the Flink stream source, you can create a `RedisSourceConfig`.
+
+The configuration options are as follows:
+
+The following table describes the fields in that class:
+
+[cols="1,1,1,1",options="header"]
+|===
+| **Field**            | **Type**            | **Default Value**              | **Required**
+| `host`               | `String`            | `"localhost"`                  | No
+| `port`               | `int`               | `6379`                         | No
+| `password`           | `String`            | `""` (empty string)            | No
+| `user`               | `String`            | `"default"`                    | No
+| `consumerGroup`      | `String`            | N/A                            | Yes
+| `topicName`          | `String`            | N/A                            | Yes
+| `numPartitions`      | `int`               | N/A                            | Yes
+| `useClusterApi`      | `boolean`           | `false`                        | No
+| `requireAck`         | `boolean`           | `true`                         | No
+| `startingId`         | `StreamEntryID`     | `StreamEntryID.XGROUP_LAST_ENTRY` | No
+|===
+
+You can then initialize the Source Builder using:
+
+[source,java]
+----
+RedisSourceBuilder<RedisMessage> sourceBuilder = new RedisSourceBuilder<>(sourceConfig, new RedisMessageDeserializer());
+----
+
+After that, all that's left is to use your environment to add the source to your pipeline:
+
+[source,java]
+----
+final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+env.getConfig().setGlobalJobParameters(globalConfig);
+env.enableCheckpointing(5000);
+env.setParallelism(4);
+TypeInformation<RedisMessage> typeInfo = TypeInformation.of(RedisMessage.class);
+String sourceName = "Redis to Redis";
+env.fromSource(sourceBuilder.build(), WatermarkStrategy.noWatermarks(), sourceName, typeInfo).sinkTo(sinkBuilder.build());
+----
+
+== Using the Redis Stream Sink
+
+To use the Redis Stream Sink, you can initialize a `RedisSinkConfig` object with the following:
+
+The following table describes the fields in that class:
+
+[cols="1,1,1,1",options="header"]
+|===
+| **Field**            | **Type**            | **Default Value**              | **Required**
+| `host`               | `String`            | `"localhost"`                  | No
+| `port`               | `int`               | `6379`                         | No
+| `password`           | `String`            | `""` (empty string)            | No
+| `user`               | `String`            | `"default"`                    | No
+| `topicName`          | `String`            | N/A                            | Yes
+| `numPartitions`      | `int`               | N/A                            | Yes
+|===
+
+You then have to initialize the builder and sink to it:
+
+[source,java]
+----
+RedisSinkBuilder<RedisMessage> sinkBuilder = new RedisSinkBuilder<>(new RedisPassthroughSerializer(), sinkConfig);
+final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+env.getConfig().setGlobalJobParameters(globalConfig);
+env.enableCheckpointing(5000);
+env.setParallelism(4);
+TypeInformation<RedisMessage> typeInfo = TypeInformation.of(RedisMessage.class);
+String sourceName = "Redis to Redis";
+env.fromSource(sourceBuilder.build(), WatermarkStrategy.noWatermarks(), sourceName, typeInfo).sinkTo(sinkBuilder.build());
+----
+
+== Quick Start
+
+You can run the demo in this repo by running:
+
+[source,bash]
+----
+docker compose up -d
+./example-redis-job.sh
+----
+
+This will spin up Redis, a Flink Job Manager and Task Manager, and start a Job with Redis as the Source and Sink.
+
+
+== Support
+
+{name} is supported by Redis, Inc. for enterprise-tier customers as a 'Developer Tool' under the https://redis.io/legal/software-support-policy/[Redis Software Support Policy.] For non enterprise-tier customers we supply support for {name} on a good-faith basis.
+To report bugs, request features, or receive assistance, please https://github.com/{project-owner}/{dist-repo-name}/issues[file an issue].
+
+== License
+
+{name} is licensed under the Business Source License 1.1. Copyright (C) 2024 Redis, Inc. See link:LICENSE.md[LICENSE] for details.
