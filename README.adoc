@@ -34,7 +34,7 @@ Add the following to your `build.gradle` file
 .build.gradle
 ----
 dependencies {
-    implementation '{project-group}:{project-name}-spring:{project-version}'
+    implementation '{project-group}:{project-name}:{project-version}'
 }
 ----
 
