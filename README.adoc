@@ -4,7 +4,7 @@
 :project-owner:      redis-field-engineering
 :project-name:       redis-flink-connector
 :project-group:      com.redis
-:project-version: 0.0.1
+:project-version: 0.0.2
 :dist-repo-name:     redis-flink-connector-dist
 
 The Redis Flink Connector is a highly performant, scalable Flink Source and Sink
@@ -34,7 +34,7 @@ Add the following to your `build.gradle` file
 .build.gradle
 ----
 dependencies {
-    implementation '{project-group}:{project-name}:{project-version}'
+    implementation '{project-group}:{project-name}-spring:{project-version}'
 }
 ----
 
@@ -111,6 +111,34 @@ env.setParallelism(4);
 TypeInformation<RedisMessage> typeInfo = TypeInformation.of(RedisMessage.class);
 String sourceName = "Redis to Redis";
 env.fromSource(sourceBuilder.build(), WatermarkStrategy.noWatermarks(), sourceName, typeInfo).sinkTo(sinkBuilder.build());
+----
+
+== Serializers and Keys
+
+The Redis Flink Connector's natural data type is the `RedisMessage` class. This class contains the data of the message (a `Map<String,String>`) and the key for the Message (a `String`).
+The `RedisPasssthroughSerializer` and the `RedisMessageDeserializer` are a simple serializer/deserializer pair that allows you to work directly with the `RedisMessage` object.
+
+The `RedisObjectSerializer` and `RedisObjectDeserializer` are generic serializers/deserializers that allow you to work with your standard serializable POJOs.
+You can use these if you want to work with your own objects domain objects, the object is serialized to JSON and added as the
+`data` field of the Stream Message that is sent to Redis.
+
+If you use these, you may also want to provide a `RedisKeyExtractor` to extract the key from the object, otherwise, a hashcode extracted from the JSON payload of the object will act as the key.
+
+The key determines what partition that a message will be sent to.
+
+=== Configure Serializer and Key Extractor
+
+You can configure the serializer and key extractor in the `RedisSinkBuilder`:
+
+[source,java]
+----
+RedisSinkBuilder<Person> sinkBuilder = new RedisSinkBuilder<Person>(new RedisObjectSerializer<>(), sinkConfig).keyExtractor(Person::getName);
+----
+
+And you can configure which deserializer to use in the `RedisSourceBuilder`:
+[source,java]
+----
+RedisSourceBuilder<Person> sourceBuilder = new RedisSourceBuilder<>(sourceConfig, new RedisObjectDeserializer<>(Person.class));
 ----
 
 == Quick Start
