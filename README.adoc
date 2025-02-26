@@ -4,7 +4,7 @@
 :project-owner:      redis-field-engineering
 :project-name:       redis-flink-connector
 :project-group:      com.redis
-:project-version: 0.0.3
+:project-version: 0.0.4
 :dist-repo-name:     redis-flink-connector-dist
 
 The Redis Flink Connector is a highly performant, scalable Flink Source and Sink
@@ -60,6 +60,7 @@ The following table describes the fields in that class:
 | `useClusterApi`      | `boolean`           | `false`                        | No
 | `requireAck`         | `boolean`           | `true`                         | No
 | `startingId`         | `StreamEntryID`     | `StreamEntryID.XGROUP_LAST_ENTRY` | No
+|`failedDeserializationStreamName` | `String`            | `""` (empty string) | No
 |===
 
 You can then initialize the Source Builder using:
@@ -88,15 +89,17 @@ To use the Redis Stream Sink, you can initialize a `RedisSinkConfig` object with
 
 The following table describes the fields in that class:
 
-[cols="1,1,1,1",options="header"]
+[cols="1,1,1,1,1",options="header"]
 |===
-| **Field**            | **Type**            | **Default Value**              | **Required**
-| `host`               | `String`            | `"localhost"`                  | No
-| `port`               | `int`               | `6379`                         | No
-| `password`           | `String`            | `""` (empty string)            | No
-| `user`               | `String`            | `"default"`                    | No
-| `topicName`          | `String`            | N/A                            | Yes
-| `numPartitions`      | `int`               | N/A                            | Yes
+| **Field**            | **Type**            | **Default Value**              | **Required** | **description**
+| `host`               | `String`            | `"localhost"`                  | No           | the Redis host name
+| `port`               | `int`               | `6379`                         | No           | the Redis port
+| `password`           | `String`            | `""` (empty string)            | No           | the Redis password
+| `user`               | `String`            | `"default"`                    | No           | the Redis user
+| `topicName`          | `String`            | N/A                            | Yes          | the Topic Name
+| `numPartitions`      | `int`               | N/A                            | Yes          | the number of partitions
+| `flushOnCheckpoint`  | `boolean`           | `false`                        | No           | whether to flush writes on checkpoint
+| `failedSerializationStreamName` | `String`            | `""` (empty string) | No           | the stream name to serialization errors to
 |===
 
 You then have to initialize the builder and sink to it:
@@ -120,7 +123,17 @@ The `RedisPasssthroughSerializer` and the `RedisMessageDeserializer` are a simpl
 
 The `RedisObjectSerializer` and `RedisObjectDeserializer` are generic serializers/deserializers that allow you to work with your standard serializable POJOs.
 You can use these if you want to work with your own objects domain objects, the object is serialized to JSON and added as the
-`data` field of the Stream Message that is sent to Redis.
+`data` field of the Stream Message that is sent to Redis. If you need to add specific modules to the `ObjectMapper` (e.g. `JavaTimeModule`), you can do so by
+passing in an `ObjectMapperSupplier` to the `RedisObjectSerializer` and `RedisObjectDeserializer` constructors. E.g.
+
+[source,java]
+----
+RedisObjectSerializer<Person> serializer = new RedisObjectSerializer<>(() -> {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            return objectMapper;
+        });
+----
 
 If you use these, you may also want to provide a `RedisKeyExtractor` to extract the key from the object, otherwise, a hashcode extracted from the JSON payload of the object will act as the key.
 
