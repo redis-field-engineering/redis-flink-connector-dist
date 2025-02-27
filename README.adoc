@@ -4,7 +4,7 @@
 :project-owner:      redis-field-engineering
 :project-name:       redis-flink-connector
 :project-group:      com.redis
-:project-version: 0.0.4
+:project-version: 0.0.5
 :dist-repo-name:     redis-flink-connector-dist
 
 The Redis Flink Connector is a highly performant, scalable Flink Source and Sink
