@@ -4,7 +4,7 @@
 :project-owner:      redis-field-engineering
 :project-name:       redis-flink-connector
 :project-group:      com.redis
-:project-version: 0.0.5
+:project-version: 0.0.7
 :dist-repo-name:     redis-flink-connector-dist
 
 The Redis Flink Connector is a highly performant, scalable Flink Source and Sink
@@ -60,7 +60,9 @@ The following table describes the fields in that class:
 | `useClusterApi`      | `boolean`           | `false`                        | No
 | `requireAck`         | `boolean`           | `true`                         | No
 | `startingId`         | `StreamEntryID`     | `StreamEntryID.XGROUP_LAST_ENTRY` | No
-|`failedDeserializationStreamName` | `String`            | `""` (empty string) | No
+|`failedDeserializationStreamName` | `String`            | `""` | No
+|`useTls` | `boolean` | `false` | No
+|`mtlsParameters` | `MtlsParameters` | `null` | No
 |===
 
 You can then initialize the Source Builder using:
@@ -100,6 +102,8 @@ The following table describes the fields in that class:
 | `numPartitions`      | `int`               | N/A                            | Yes          | the number of partitions
 | `flushOnCheckpoint`  | `boolean`           | `false`                        | No           | whether to flush writes on checkpoint
 | `failedSerializationStreamName` | `String`            | `""` (empty string) | No           | the stream name to serialization errors to
+|`useTls` | `boolean` | `false` | No | whether to use TLS
+|`mtlsParameters` | `MtlsParameters` | `null` | No | parameters to use for mTLS
 |===
 
 You then have to initialize the builder and sink to it:
