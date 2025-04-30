@@ -4,7 +4,7 @@
 :project-owner:      redis-field-engineering
 :project-name:       redis-flink-connector
 :project-group:      com.redis
-:project-version: 0.0.7
+:project-version: 0.0.10
 :dist-repo-name:     redis-flink-connector-dist
 
 The Redis Flink Connector is a highly performant, scalable Flink Source and Sink
@@ -101,9 +101,12 @@ The following table describes the fields in that class:
 | `topicName`          | `String`            | N/A                            | Yes          | the Topic Name
 | `numPartitions`      | `int`               | N/A                            | Yes          | the number of partitions
 | `flushOnCheckpoint`  | `boolean`           | `false`                        | No           | whether to flush writes on checkpoint
+| `numMessagesToBuffer` | `int`              | `0`                            | No           | number of messages to buffer before flushing (when > 0)
+| `flushIntervalMillis` | `int`              | `0`                            | No           | time interval in milliseconds for periodic flushing (when > 0)
 | `failedSerializationStreamName` | `String`            | `""` (empty string) | No           | the stream name to serialization errors to
 |`useTls` | `boolean` | `false` | No | whether to use TLS
 |`mtlsParameters` | `MtlsParameters` | `null` | No | parameters to use for mTLS
+|`traceConfiguration` | `SinkTraceConfiguration` | `null` | No | configuration for tracing events processed by the sink
 |===
 
 You then have to initialize the builder and sink to it:
@@ -170,6 +173,49 @@ docker compose up -d
 
 This will spin up Redis, a Flink Job Manager and Task Manager, and start a Job with Redis as the Source and Sink.
 
+== Sink Trace Configuration
+
+The Redis Sink supports configurable tracing of events processed by the sink. This allows you to track the success or failure of event writes with different levels of detail. Tracing can be configured using the `SinkTraceConfiguration` class with the following options:
+
+=== Trace Levels
+
+The `SinkTraceLevel` enum controls which events are traced:
+
+[cols="1,2",options="header"]
+|===
+| **Level**   | **Description**
+| `NONE`      | No tracing (default when configuration is null)
+| `FAILURES`  | Only trace failed writes
+| `ALL`       | Trace all events (both successful and failed writes)
+|===
+
+=== Trace Contents
+
+The `SinkTraceContents` enum controls what information is included in the trace:
+
+[cols="1,2",options="header"]
+|===
+| **Contents** | **Description**
+| `NONE`       | No content (minimal tracing)
+| `METADATA`   | Include metadata about the event (timestamps, keys, etc.)
+| `ALL`        | Include full message contents along with metadata
+|===
+
+=== Example Configuration
+
+[source,java]
+----
+// Configure tracing for all events with full message contents
+SinkTraceConfiguration traceConfig = new SinkTraceConfiguration(SinkTraceLevel.ALL, SinkTraceContents.ALL);
+
+// Use the configuration when building your sink
+RedisSinkConfig config = RedisSinkConfig.builder()
+        .host("redis")
+        .topicName("output")
+        .numPartitions(3)
+        .traceConfiguration(traceConfig)
+        .build();
+----
 
 == Support
 
